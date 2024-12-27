@@ -1,7 +1,7 @@
 <?php 
   include '../db/config.php';
 
-class contrat {
+class Contrat {
     private $contraid;
     private $voitureid;
     private $clientid;
@@ -11,8 +11,7 @@ class contrat {
     private $prixtotal;
     private $conn;
   
-    public function __construct($conn,$contraid,$voitureid,$clientid,$datedebut,$datefin,$duree,$prixtotal){
-      $this->contraid = $contraid;
+    public function __construct($conn,$voitureid,$clientid,$datedebut,$datefin,$duree,$prixtotal){
       $this->voitureid = $voitureid;
       $this->clientid = $clientid;
       $this->datedebut = $datedebut;
@@ -21,42 +20,96 @@ class contrat {
       $this->prixtotal = $prixtotal;
       $this->conn = $conn;
     }
-  
-    public function addContrat(){
-      $sql = "INSERT INTO contrat (client_id, nom, prenom,email, telephone) VALUES (?,?,?,?,?)";
-      $stmt = $this->conn->prepare($sql);
-      $stmt->bind_param("sssss",$this->idclient,$this->nomclient,$this->prenomclient,$this->emailclint,$this->telclint);
-      $stmt->execute();
-      $stmt->close();
-    }
-  
-    public function deleteClient($id){
-      $sql = "DELETE from client where client_id = ?";
-      $stmt= $this->conn->prepare($sql);
-      $stmt->bind_param("s",$id);
-      $stmt->execute();
-      $stmt->close();
-    }
-    public function selectOneClient($id){
-      $sql = "SELECT * from client where client_id='$id'";
-      $result = $this->conn->query($sql);
-      return $result;
 
+    public function getVoitureId() {
+        return $this->voitureid;
+    }
+
+    public function getClientId() {
+        return $this->clientid;
+    }
+
+    public function getDateDebut() {
+        return $this->datedebut;
+    }
+
+    public function getDateFin() {
+        return $this->datefin;
+    }
+
+    public function getDuree() {
+        return $this->duree;
+    }
+
+    public function getPrixTotal() {
+        return $this->prixtotal;
+    }
+
+    public function getConnection() {
+        return $this->conn;
+    }
+
+    // Setters
+    public function setVoitureId($voitureid) {
+        $this->voitureid = $voitureid;
+    }
+
+    public function setClientId($clientid) {
+        $this->clientid = $clientid;
+    }
+
+    public function setDateDebut($datedebut) {
+        $this->datedebut = $datedebut;
+    }
+
+    public function setDateFin($datefin) {
+        $this->datefin = $datefin;
+    }
+
+    public function setDuree($duree) {
+        $this->duree = $duree;
+    }
+
+    public function setPrixTotal($prixtotal) {
+        $this->prixtotal = $prixtotal;
+    }
+
+    public function setConnection($conn) {
+        $this->conn = $conn;
     }
   
-    public function getClients(){
-      $sql = "SELECT * from client";
+
+    public function selectOneContrat($id){
+      $sql = "SELECT * from contrat,voiture where contrat_id='$id' and voiture.matricule = contrat.voiture_id";
+      $result = $this->conn->query($sql);
+      return $result;
+    }
+
+    public function getContrat(){
+      $sql = "SELECT * from contrat";
       $result = $this->conn->query($sql);
       return $result;
     }
   
-    public function editClient($idcl,$nomcl,$prenomcl,$telcl,$emailcl){
-      $sql = "UPDATE client SET nom = ?, prenom = ?, telephone = ?, email = ? where client_id = ?";
-      $stmt = $this->conn->prepare($sql);
-      $stmt->bind_param('sssss',$nomcl,$prenomcl,$telcl,$emailcl,$idcl);
-      $stmt->execute();
-      $stmt->close();
+
+    public function selectTotalPrix($idvoiture){
+        $sql = "SELECT prix_location from Voiture where matricule = '$idvoiture'";
+        $result = $this->conn->query($sql);
+        return $result;
     }
-  
+
+    public function getjointContratVoiture(){
+        $sql = "SELECT * from contrat,voiture where voiture.matricule = contrat.voiture_id";
+        $result = $this->conn->query($sql);
+        return $result;
+      }
+
+    public function getjointContratVoitureClient(){
+        $sql = "SELECT * from contrat,voiture,client WHERE voiture.matricule = contrat.voiture_id and contrat.client_id=client.client_id";
+        $result = $this->conn->query($sql);
+        return $result;
+    }
+
+
   }
 ?>
