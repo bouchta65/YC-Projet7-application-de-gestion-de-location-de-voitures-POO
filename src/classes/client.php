@@ -3,19 +3,16 @@
   include '../classes/user.php';
 
 
-class client extends User{
+class Client extends User{
 
   
-    public function __construct($conn,$idclient,$nomclient,$prenomclient,$telclint,$emailclint){
-      $this->idclient = $idclient;
-      $this->nomclient = $nomclient;
-      $this->prenomclient = $prenomclient;
-      $this->telclint = $telclint;
-      $this->emailclint = $emailclint;
-      $this->conn = $conn;
-    }
-  
-    // Getters
+  public function __construct($conn,$nom, $id, $email, $telephone, $password, $role) {
+    parent::__construct($conn, $nom, $id, $email, $telephone, $password, $role);
+  }
+  function getclient($email){
+    $sql = "SELECT * from client where email = '$email'";
+    return $this->conn->query($sql);
+  }
     public function getId() {
       return $this->idclient;
   }
@@ -24,7 +21,7 @@ class client extends User{
       return $this->nomclient;
   }
 
-  public function getPrenom() {
+  public function getCIN() {
       return $this->prenomclient;
   }
 
@@ -36,12 +33,11 @@ class client extends User{
       return $this->emailclint;
   }
 
-  // Setters
   public function setNom($nom) {
       $this->nomclient = $nom;
   }
 
-  public function setPrenom($prenom) {
+  public function setCIN($prenom) {
       $this->prenomclient = $prenom;
   }
 
@@ -52,7 +48,26 @@ class client extends User{
   public function setEmail($email) {
       $this->emailclint = $email;
   }
+
+    public function reserveVoiture($idvoiture, $idclient, $date_debut, $date_fin, $duree, $prixtotal) {
     
+          $sql = "INSERT INTO contrat (voiture_id, client_id, date_debut, date_fin, Duree, prixtotal, status) 
+                        VALUES (?, ?, ?, ?, ?, ?, 'en attente')";
+          $stmt = $this->conn->prepare($sql);
+          $stmt->bind_param("ssssid", $idvoiture, $idclient, $date_debut, $date_fin, $duree, $prixtotal);
+  
+          if ($stmt->execute()) {
+              echo "<script>alert('Réservation réussie. Contrat ajouté.');</script>";
+          } else {
+              echo "<script>alert('Erreur lors de l\'ajout du contrat.');</script>";
+          }
+
+      $stmt->close();
   
   }
+
+
+}
+
+  
 ?>

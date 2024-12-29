@@ -1,4 +1,6 @@
 <?php
+  include '../db/config.php';
+
 class Voiture {
   private $matricule;
   private $marque;
@@ -123,5 +125,11 @@ class Voiture {
     $sql = "SELECT * from voiture where matricule = '$matricule'";
     return $this->conn->query($sql);
   }
+  public function getPrixtotall($idvoiture){
+    $sql = "SELECT prix_location from voiture where matricule = '$idvoiture'";
+  return $this->conn->query($sql);;
+  }
+
+ 
 }
 ?>

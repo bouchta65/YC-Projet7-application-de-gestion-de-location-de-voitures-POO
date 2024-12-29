@@ -2,12 +2,12 @@
   include '../db/config.php';
 class User{
     private $nom;
-    private $prenom;
+    private $id;
     private $email;
     private $telephone;
     private $password;
     private $role;
-    private $conn;
+    protected  $conn;
      
     public function __construct($conn, $id, $name, $email, $password, $role) {
         $this->conn = $conn;
@@ -58,34 +58,26 @@ class User{
         $this->role = $role;
     }
     
-    // public function login($email,$password){
-    //     $sql = "SELECT * from client where email = '$email' and role ='$this->role'";
-    //     $result = $this->conn->query($sql);
+    public function login($email,$password){
+        $sql = "SELECT * from client where email = '$email' and role ='$this->role'";
+        $result = $this->conn->query($sql);
         
-    //     if ($result && $result->num_rows > 0) {
-    //         $user = $result->fetch_row(); 
-    //         if (password_verify($password, $user[5])) { 
-    //             $_SESSION["user"] = $user[2]; 
-    //             $_SESSION["role"] = $user[4]; 
-    //         } else {
-    //             echo "Mot de passe incorrect.";
-    //         }
-    //     } else {
-    //         echo "Utilisateur non trouvé.";
-    //     }
-    // }
+        if ($result && $result->num_rows > 0) {
+            $user = $result->fetch_row(); 
+            if (password_verify($password, $user[5])) { 
+                $_SESSION["user"] = $user[2]; 
+                $_SESSION["role"] = $user[4]; 
+                 header("Location: ../../index.php");
+            } else {
+                 echo "<script>alert('Mot de passe incorrect');</script>";
+            }
+        } else {
+           echo "<script>alert('Email non trouvé');</script>";
+        }
+    }
 
-    // public function registre($nom,$prenom,$emial,$telephone,$role,$password){
-    //     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-    //     $sql = "INSERT into client(nom,prenom,email,telephone,role,password) values($nom,$prenom,$email,$telephone,$role,$hashedPassword)";
-    //     $this->conn->query($sql);
-    // }
+
     
-    // // public function getEmail($email){
-    // //     $sql = "SELECT * from client where email = '$email'";
-    // //     $result = $this->conn->query($sql);
-    // //     return $result;
-    // // }
 
 }
 ?>
