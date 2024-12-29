@@ -8,6 +8,11 @@ const closeVehicleModalBtn = document.querySelector('#closeVehicleModal')
 const closeModalBtnAlt = document.querySelector('#closeModalBtn')
 const form = document.querySelector('#vehicleForm')
 const valideButton = document.querySelector('#validateForm')
+const sectionRegistre = document.querySelector('#registre');
+const sectionLogin = document.querySelector('#login');
+
+
+
 
 
 
