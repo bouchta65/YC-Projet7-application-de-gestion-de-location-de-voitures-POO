@@ -234,8 +234,7 @@ $result = $contratObj->getjointContratVoiture();
 
       if (isset($_POST['remove'])) {
         $idcontrat = $_POST['remove'];
-        $sql3 = "DELETE FROM contrat WHERE contrat_id='$idcontrat'";
-        mysqli_query($conn, $sql3);
+        $admin->deleteContrat($idcontrat);
       }
 
       $result = $contratObj->getjointContratVoiture();
@@ -311,11 +310,9 @@ if(isset($_POST['EditForm'])){
     $result = mysqli_query($conn,$sqll);
     $prix = mysqli_fetch_row($result);
     $prixtotall = $prix[0]*$duree;
+    $admin->editContrat($idcontrat,$datedebut,$datefin,$duree,$prixtotall);
+    echo "<script>window.location.href = window.location.href;</script>";
 
-  $sql5="UPDATE contrat SET date_debut = '$datedebut', date_fin = '$datefin', Duree = '$duree', prixtotal= '$prixtotall'
-  where contrat_id = '$idcontrat'";
-  mysqli_query($conn,$sql5);
-  echo "<script>window.location.href = window.location.href;</script>";
 }
 
 $result = $contratObj->getjointContratVoitureClient();
