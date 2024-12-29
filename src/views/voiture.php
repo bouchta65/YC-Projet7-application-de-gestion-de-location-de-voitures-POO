@@ -1,10 +1,16 @@
 <?php
 session_start(); 
 
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php"); 
+if (isset($_SESSION["user"]) && $_SESSION["role"] == "Admin" ) {
+}else{
+  header("Location: login.php"); 
+
 }
+include '../classes/admin.php';
+
+$admin = new Admin($conn);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +22,7 @@ if (!isset($_SESSION["user"])) {
 </head>
 
 <body>
+  
 <header class='flex shadow-md sm:px-10 px-6 py-3 bg-white font-[sans-serif] min-h-[70px]'>
       <div class="flex w-full max-w-screen-xl mx-auto">
         <div
@@ -100,8 +107,10 @@ if (!isset($_SESSION["user"])) {
         </div>
       </div>
     </header>
+
+   
     <div id="vehicleModal" class="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50 hidden">
-  <form id="vehicleForm" class="bg-white rounded-lg w-full max-w-[60rem] sm:max-w-3/4 md:max-w-2/3 p-4 sm:p-6 shadow-lg overflow-y-auto" method='POST' action='voiture.php' enctype="multipart/form-data" >
+  <form id="vehicleForm" class="bg-white rounded-lg w-full max-w-[60rem] sm:max-w-3/4 md:max-w-2/3 p-4 sm:p-6 shadow-lg overflow-y-auto" method='POST' action='voiture.php' enctype="multipart/form-data">
     <div class="flex justify-between items-center mb-4 sm:mb-6">
       <h2 class="text-xl sm:text-2xl font-semibold text-gray-800">Nouvelle Voiture</h2>
       <button id="closeVehicleModal" class="text-gray-500 hover:text-gray-700 focus:outline-none">
@@ -167,16 +176,14 @@ if (!isset($_SESSION["user"])) {
   </form>
 </div>
 
-
 <?php
-  include '../db/config.php';
-  
+
 if(isset($_POST['validateForm'])){
   
   $matricule = $_POST['matricule'];
   $marque=$_POST['marque'];
   $modele=$_POST['modele'];
-  $annee=$_POST['productionDate'];
+  $Annee=$_POST['productionDate'];
   $fuelType=$_POST['fuelType'];
   $status=$_POST['status'];
   $prixvoiture=$_POST['prixvoiture'];
@@ -186,16 +193,12 @@ if(isset($_POST['validateForm'])){
 
   $imagevoiture = $targetDir . basename($imageName);
 
-
-
-
-  $sql = "INSERT INTO voiture (matricule, marque, modele, Annee, type_carburant, image_voiture, etat, prix_location)  VALUES('$matricule','$marque','$modele','$annee','$fuelType','$imagevoiture','$status','$prixvoiture')";
-  mysqli_query($conn, $sql);
+  $newCar = new voiture($conn, $matricule, $marque, $modele, $Annee, $fuelType, $status, $prixvoiture, $imageName, $targetDir, $imagevoiture);
+  $admin->addVoiture($newCar);
 }
 
-  $sql2 = "SELECT * from voiture";
-  $result  = mysqli_query($conn,$sql2);
-
+  $carObj = new voiture($conn, "", "", "", "", "", "","","","","","" );
+  $result = $carObj->getVoiture();
 ?>
 
 <div class="hidden lg:block overflow-x-auto">
@@ -227,7 +230,7 @@ if(isset($_POST['validateForm'])){
           echo '<td class="py-3 px-4 text-sm">'.$i[7].'</td>';
           echo '<td class="py-3 px-4 text-sm">'.$i[6].'</td>';
           echo '<td class="py-3 px-4 text-sm">';
-          echo '   <form method="POST" action="" >
+          echo '   <form method="POST" action="">
                 <button type="submit" name="Edit" value="'.$i[0].'" class="bg-blue-500  text-white py-1 px-3 rounded-md hover:bg-red-600">Edit</button>
                 <button type="submit" name="remove" value="'.$i[0].'" class="bg-red-500 text-white py-1 px-3 rounded-md hover:bg-red-600">Remove</button>
               </form>';
@@ -239,12 +242,11 @@ if(isset($_POST['validateForm'])){
 
         if(isset($_POST['remove'])){
           $matricule = $_POST['remove'];
-          $sql3 = "DELETE from voiture where matricule='$matricule'";
-          mysqli_query($conn,$sql3);
-          
+          $admin->deleteVoiture($matricule);
+
           }
          
-      $result  = mysqli_query($conn,$sql2);
+      $result = $carObj->getVoiture();
       affichvoiture($result);
       ?>
     </tbody>
@@ -261,10 +263,8 @@ if(isset($_POST['validateForm'])){
 
    if (isset($_POST['Edit']) ) {
     $matricule = $_POST['Edit'];
-
-    $sql4 = "SELECT * FROM voiture WHERE matricule = '$matricule'";
-    $result2 = mysqli_query($conn,$sql4);
-    $voiture = mysqli_fetch_assoc($result2);
+    $result = $carObj->getOneVoiture($matricule);
+    $voiture = $result->fetch_Assoc();
     $marque = $voiture['marque'];
     $modele = $voiture['modele'];
     $productionDate = $voiture['Annee'];
@@ -348,20 +348,18 @@ if(isset($_POST['validateForm'])){
     $matricule = $_POST['matricule'];
     $marque=$_POST['marque'];
     $modele=$_POST['modele'];
-    $annee=$_POST['productionDate'];
+    $Annee=$_POST['productionDate'];
     $fuelType=$_POST['fuelType'];
     $status=$_POST['status'];
     $prixvoiture=$_POST['prixvoiture'];
+    $admin->editVoiture($matricule, $marque, $modele, $Annee, $fuelType, $status, $prixvoiture);
+    echo "<script>window.location.href = window.location.href;</script>";
 
-    $sql5="UPDATE voiture SET marque = '$marque', modele = '$modele', Annee = '$annee', type_carburant = '$fuelType', etat = '$status', prix_location = '$prixvoiture' 
-    where matricule = '$matricule'";
-    mysqli_query($conn,$sql5);
-echo "<script>window.location.href = window.location.href;</script>";
 
   }
 
-  $result  = mysqli_query($conn,$sql2);
-   while($i = mysqli_fetch_row($result)){
+  $result = $carObj->getVoiture();
+   while($i = $result->fetch_row()){
     echo '<div class="lg:hidden grid grid-cols-1 gap-6 mt-6">';
     echo '<div class="bg-white shadow-lg rounded-lg p-4">';
     echo '<img src="'.$i[5].'" alt="Car 1" class="w-full  object-cover rounded-lg mb-4">';

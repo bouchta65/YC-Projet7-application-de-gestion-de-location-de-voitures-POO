@@ -1,11 +1,14 @@
 <?php
 session_start(); 
 
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php"); 
+if (isset($_SESSION["user"]) && $_SESSION["role"] == "Admin" ) {
+}else{
+  header("Location: login.php"); 
+
 }
 include '../classes/admin.php';
 
+$voiture = new Voiture($conn,"","","","","","","","","","");
 $admin = new Admin($conn);
 
 ?>
@@ -140,9 +143,8 @@ include '../db/config.php';
           <select id="idvoiture" name="idvoiture" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
          <option value="">Select Voiture</option>
           <?php
-            $sql = "SELECT * from voiture";
-            $result = mysqli_query($conn,$sql);
-            while($i = mysqli_fetch_row($result)){
+              $result = $voiture->getVoiture();
+            while($i = $result->fetch_row()){
                 echo '<option value="'.$i[0].'">'.$i[0].'</option>';
             }
             ?>
@@ -176,11 +178,10 @@ if(isset($_POST['validateForm'])){
   $datedebut = $_POST['datedebut'];
   $datefin = $_POST['datefin'];
   $duree = (strtotime($datefin) - strtotime($datedebut)) / (60 * 60 * 24);
-  // $sqll = "SELECT prix_location from voiture where matricule = '$idvoiture'";
-  // $result = mysqli_query($conn,$sqll);
-  // $prix = mysqli_fetch_row($result);
-  // $prixtotall = $prix[0]*$duree;
-  $contratObj = new contrat($conn,$idvoiture,$idclient,$datedebut,$datefin,$duree,0);
+  $result = $voiture->getPrixtotall($idvoiture);
+  $prix = $result->fetch_row();
+  $prixtotall = $prix[0]*$duree;
+  $contratObj = new contrat($conn,$idvoiture,$idclient,$datedebut,$datefin,$duree,$prixtotall);
   $admin->addContrat($contratObj);
 
   
@@ -216,7 +217,7 @@ $result = $contratObj->getjointContratVoiture();
           echo '<td class="py-3 px-4 text-sm">'.$i[2].'</td>'; 
           echo '<td class="py-3 px-4 text-sm">'.$i[1].'</td>'; 
           echo '<td class="py-3 px-4">';
-          echo '<img src="'.$i[12].'" class=" h-16 object-cover rounded-lg">';
+          echo '<img src="'.$i[13].'" class=" h-16 object-cover rounded-lg">';
           echo '</td>';
           echo '<td class="py-3 px-4 text-sm">'.$i[3].'</td>'; 
           echo '<td class="py-3 px-4 text-sm">'.$i[4].'</td>'; 

@@ -1,10 +1,14 @@
 <?php
 session_start(); 
 
-if (!isset($_SESSION["user"])) {
-    header("Location: login.php"); 
+if (isset($_SESSION["user"]) && $_SESSION["role"] == "Admin" ) {
+}else{
+  header("Location: login.php"); 
+
 }
-include "../classes/client.php";
+include "../classes/admin.php";
+$admin = new Admin($conn);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -126,10 +130,6 @@ include "../classes/client.php";
           <input type="text" id="nomclient" name="nomclient" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: Mohammed">
         </div>
         <div class="flex flex-col">
-          <label for="prenomclient" class="font-medium text-gray-600 text-sm sm:text-base">Prénom</label>
-          <input type="text" id="prenomclient" name="prenomclient" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: Bouchta">
-        </div>
-        <div class="flex flex-col">
           <label for="emailclient" class="font-medium text-gray-600 text-sm sm:text-base">Email</label>
           <input type="email" id="emailclient" name="emailclient" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ex: bouchta14@gmail.com">
         </div>
@@ -151,17 +151,15 @@ include "../classes/client.php";
 if(isset($_POST['validateForm'])){
   $idclient = $_POST['idclient'];
   $nomclient = $_POST['nomclient'];
-  $prenomclient = $_POST['prenomclient'];
   $telclient = $_POST['telclient'];
   $emailclient = $_POST['emailclient'];
+  $password = "0000";
 
-  $clientobj = new client($conn,$idclient,$nomclient,$prenomclient,$telclient,$emailclient);
-  $clientobj->addClient();
+  $admin->addClient($idclient,$nomclient, $emailclient, $telclient, $password);
 }
 
 
-$clientobj = new client($conn,"","","","","");
-$clients = $clientobj->getClients();
+$clients = $admin->getClients();
 ?>
 <div class="hidden lg:block overflow-x-auto">
   <table class="min-w-full bg-white shadow-md rounded-lg border-collapse">
@@ -169,9 +167,9 @@ $clients = $clientobj->getClients();
       <tr class="bg-gray-200 text-gray-700">
         <th class="py-3 px-4 text-left text-sm font-semibold">ID Client</th>
         <th class="py-3 px-4 text-left text-sm font-semibold">Nom</th>
-        <th class="py-3 px-4 text-left text-sm font-semibold">Prénom</th>
-        <th class="py-3 px-4 text-left text-sm font-semibold">Téléphone</th>
         <th class="py-3 px-4 text-left text-sm font-semibold">Email</th>
+        <th class="py-3 px-4 text-left text-sm font-semibold">Téléphone</th>
+        <th class="py-3 px-4 text-left text-sm font-semibold">Role</th>
         <th class="py-3 px-4 text-left text-sm font-semibold">Actions</th>
       </tr>
     </thead>
@@ -184,8 +182,8 @@ $clients = $clientobj->getClients();
           echo '<td class="py-3 px-4 text-sm">'.$i[0].'</td>'; 
           echo '<td class="py-3 px-4 text-sm">'.$i[1].'</td>'; 
           echo '<td class="py-3 px-4 text-sm">'.$i[2].'</td>'; 
-          echo '<td class="py-3 px-4 text-sm">'.$i[4].'</td>'; 
           echo '<td class="py-3 px-4 text-sm">'.$i[3].'</td>'; 
+          echo '<td class="py-3 px-4 text-sm">'.$i[4].'</td>'; 
           echo '<td class="py-3 px-4 text-sm">';
           echo '   <form method="POST" action="">
                       <button type="submit" name="Edit" value="'.$i[0].'" class="bg-blue-500 text-white py-1 px-3 rounded-md hover:bg-blue-600">Edit</button>
@@ -198,10 +196,10 @@ $clients = $clientobj->getClients();
 
       if(isset($_POST['remove'])){
         $id_client = $_POST['remove'];
-        $clientobj = new client($conn,"","","","","");
-        $clientobj->deleteClient($id_client);
+        $admin->deleteClient($id_client);
       }
-      $clients = $clientobj->getClients();
+
+      $clients = $admin->getClients();
       affichClient($clients);
       ?>
     </tbody>
@@ -213,14 +211,13 @@ $clients = $clientobj->getClients();
 if (isset($_POST['Edit'])) {
   $idClient = $_POST['Edit'];
   
-  $clients = $clientobj->selectOneClient($idClient);
+  $clients = $admin->selectOneClient($idClient);
   $client = $clients->fetch_row();
 
   
   $nomClient = $client[1];
-  $prenomClient = $client[2];
-  $telClient = $client[4];
-  $emailclient = $client[3];
+  $telClient = $client[3];
+  $emailclient = $client[2];
 
 
 echo '
@@ -244,10 +241,7 @@ echo '
                     <label for="nomclient" class="font-medium text-gray-600 text-sm sm:text-base">Nom</label>
                     <input type="text" id="nomclient" name="nomclient" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="'.$nomClient.'" placeholder="Ex: Renault">
                 </div>
-                <div class="flex flex-col">
-                    <label for="prenomclient" class="font-medium text-gray-600 text-sm sm:text-base">Prénom</label>
-                    <input type="text" id="prenomclient" name="prenomclient" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="'.$prenomClient.'" placeholder="Ex: Clio">
-                </div>
+  
                   <div class="flex flex-col">
                     <label for="emailclient" class="font-medium text-gray-600 text-sm sm:text-base">Email</label>
                     <input type="text" id="emailclient" name="emailclient" class="mt-2 p-2 sm:p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" value="'.$emailclient.'" placeholder="Ex: Clio">
@@ -273,15 +267,14 @@ if(isset($_POST['EditForm'])){
 
   $idClient = $_POST['idclient'];
   $nomClient = $_POST['nomclient'];
-  $prenomClient = $_POST['prenomclient'];
   $telClient = $_POST['telclient'];
   $emailclient = $_POST['emailclient'];
-  $clients = $clientobj->editClient($idClient,$nomClient,$prenomClient,$telClient,$emailclient);
+  $clients = $admin->editClient($idClient,$nomClient,$telClient,$emailclient);
 
 echo "<script>window.location.href = window.location.href;</script>";
 
 }
-$clients = $clientobj->getClients();
+$clients = $admin->getClients();
 while($i = $clients->fetch_row()){
  echo '<div class="lg:hidden grid grid-cols-1 gap-6 mt-6">';
  echo '<div class="bg-white shadow-lg rounded-lg p-4">';
