@@ -1,6 +1,7 @@
 <?php
 include '../classes/contrat.php';
 include '../classes/client.php';
+include '../classes/voiture.php';
 
 class Admin {
     private $conn;
@@ -67,13 +68,48 @@ class Admin {
         $stmt->close();
       }
 
-      public function editContrat($datedebut,$datefin,$duree,$prixtotal){
-        $sql = "UPDATE contrat SET date_debut = ?, date_fin = ?, Duree = ?, prixtotal= ?";
+      public function editContrat($idcontrat,$datedebut,$datefin,$duree,$prixtotal){
+        $sql = "UPDATE contrat SET date_debut = ?, date_fin = ?, Duree = ?, prixtotal= ? where contrat_id = ?";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param('ssid',$datedebut,$datefin,$duree,$emailcl,$prixtotal);
+        $stmt->bind_param('ssidi',$datedebut,$datefin,$duree,$prixtotal,$idcontrat);
         $stmt->execute();
         $stmt->close();
       }
+
+
+      public function addVoiture(Voiture $voiture){
+        $matricule = $voiture->getMatricule();
+        $marque = $voiture->getMarque();
+        $modele = $voiture->getModele();
+        $annee = $voiture->getAnnee();
+        $fuelType = $voiture->getFuelType();
+        $status = $voiture->getStatus();
+        $prixVoiture = $voiture->getPrixVoiture();
+        $imageName = $voiture->getImageName();
+        $targetDir = $voiture->getTargetDir();
+        $imageVoiture = $voiture->getImageVoiture();
+        $conn = $voiture->getConn();
+        
+        $sql = "INSERT INTO voiture (matricule, marque, modele, Annee, type_carburant, image_voiture, etat, prix_location) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("sssisssd", $matricule, $marque, $modele, $annee, $fuelType, $imageVoiture, $status, $prixVoiture);
+        $stmt->execute();
+        $stmt->close();
+
+  }
+
+  public function deleteVoiture($matricule){
+    $sql = "DELETE from voiture where matricule='$matricule'";
+    return $this->conn->query($sql);
+  }
+
+
+
+  public function editVoiture($matricule, $marque, $modele, $Annee, $fuelType, $status, $prixVoiture){
+    $sql="UPDATE voiture SET marque = '$marque', modele = '$modele', Annee = '$Annee', type_carburant = '$fuelType', etat = '$status', prix_location = '$prixVoiture' 
+    where matricule = '$matricule'";
+    return $this->conn->query($sql);
+  }
 
 }
 ?>
